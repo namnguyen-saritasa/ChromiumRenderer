@@ -31,7 +31,7 @@
 
     <Target Name="WindowsRemoveRuntime" BeforeTargets="Clean" Condition="'$(OS)' == 'Windows_NT'">
         <Message Text="Deleting ChromiumRenderer/runtimes-cache" Importance="high"/>
-        <Exec Command="rmdir /s /q ChromiumRenderer\runtimes-cache" WorkingDirectory="$(InstallerRootDirectory)"/>
+        <Exec Command="rmdir /s /q runtimes-cache" WorkingDirectory="$(InstallerRootDirectory)"/>
     </Target>
 
     <Target Name="UnixDownloadRuntime" BeforeTargets="PreBuildEvent" Condition="'$(OS)' != 'Windows_NT'">
@@ -55,7 +55,7 @@
 
     <Target Name="UnixRemoveRuntimes" BeforeTargets="Clean" Condition="'$(OS)' != 'Windows_NT'">
         <Message Text="Deleting ChromiumRenderer/runtimes-cache" Importance="high"/>
-        <Exec Command="rm -rf ChromiumRenderer/runtimes-cache" WorkingDirectory="$(InstallerRootDirectory)"/>
+        <Exec Command="rm -rf runtimes-cache" WorkingDirectory="$(InstallerRootDirectory)"/>
     </Target>
 
 </Project>

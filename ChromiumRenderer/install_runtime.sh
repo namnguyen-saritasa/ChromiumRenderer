@@ -1,19 +1,21 @@
 #!/bin/bash
 set -e
 
+BUILD_VER="133.0.6943.126"
+
 os=$(uname -s)
 arch=$(uname -m)
 
 # Darwin-specific syntax
 if [[ "$os" == "Darwin" &&  "$arch" == "arm64" ]]; then
-    url="https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/mac-arm64/chrome-headless-shell-mac-arm64.zip"
+    url="https://storage.googleapis.com/chrome-for-testing-public/$BUILD_VER/mac-arm64/chrome-headless-shell-mac-arm64.zip"
     download_path="/tmp/chrome-headless-shell-mac-arm64.zip"
     extract_dir="runtimes-cache/osx-arm64"
     rename_dir="runtimes-cache/osx-arm64/native"
     target_rename_dir="runtimes-cache/osx-arm64/chrome-headless-shell-mac-arm64"
     is_linux=0
 elif [ "$os" = "Linux" ] && [ "$arch" = "x86_64" ]; then
-    url="https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/linux64/chrome-headless-shell-linux64.zip"
+    url="https://storage.googleapis.com/chrome-for-testing-public/$BUILD_VER/linux64/chrome-headless-shell-linux64.zip"
     download_path="/tmp/chrome-headless-shell-linux64.zip"
     extract_dir="runtimes-cache/linux-x64"
     rename_dir="runtimes-cache/linux-x64/native"
@@ -80,7 +82,7 @@ download "$is_linux" "$use_wget" "$url" "$download_path"
 echo "Extracting to $extract_dir..."
 mkdir -p "$extract_dir"
 
-if [ $is_linux ]; then
+if [ $is_linux == 1 ]; then
     if [ ! -f /tmp/busybox ]; then
         echo "Installing busybox"
         download "$is_linux" "$use_wget" "https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox" "/tmp/busybox"

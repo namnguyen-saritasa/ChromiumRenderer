@@ -10,7 +10,7 @@ if /I "%PROCESSOR_ARCHITECTURE%"=="x86" (
 echo "runtimes-cache" > .gitignore
 echo "runtimes-cache/" > .dockerignore
 
-REM Set up temporary download folder and target extraction folder
+set "BuildVer=133.0.6943.126"
 set "tempDir=%TEMP%\chrome-headless-shell-win64-download"
 if not exist "%tempDir%" mkdir "%tempDir%"
 set "zipFile=%tempDir%\chrome-headless-shell-win64.zip"
@@ -24,7 +24,7 @@ if exist "%targetDir%" rmdir /s /q "%targetDir%"
 
 REM Download the zip file using certutil
 echo Downloading chromedriver...
-curl "https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/win64/chrome-headless-shell-win64.zip" --output "%zipFile%"
+curl "https://storage.googleapis.com/chrome-for-testing-public/%BuildVer%/win64/chrome-headless-shell-win64.zip" --output "%zipFile%"
 if errorlevel 1 (
     echo Download failed.
     exit /b 1
