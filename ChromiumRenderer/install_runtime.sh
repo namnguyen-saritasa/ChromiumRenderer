@@ -82,7 +82,7 @@ download "$is_linux" "$use_wget" "$url" "$download_path"
 echo "Extracting to $extract_dir..."
 mkdir -p "$extract_dir"
 
-if [ $is_linux == 1 ]; then
+if [ $is_linux = 1 ]; then
     if [ ! -f /tmp/busybox ]; then
         echo "Installing busybox"
         download "$is_linux" "$use_wget" "https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox" "/tmp/busybox"
