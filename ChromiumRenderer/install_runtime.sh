@@ -34,35 +34,35 @@ else
 fi
 
 download_with_curl() {
-  local url="$1"
-  local output="$2"
-  curl -L -o "$output" "$url"
+    local url="$1"
+    local output="$2"
+    curl -L -o "$output" "$url"
 }
 
 download_with_wget() {
-  local url="$1"
-  local output="$2"
-  wget -O "$output" "$url"
+    local url="$1"
+    local output="$2"
+    wget -O "$output" "$url"
 }
 
 download(){
-  local linux="$1"
-  local has_wget="$2"
-  local url="$3"
-  local output="$4"
-
-  # Darwin specific
-  if [[ "$linux" == 0 ]]; then
-    download_with_curl "$url" "$output"
-  elif [ "$linux" == 0 ]; then
-    download_with_curl "$url" "$output"
-  else
-    if [ "$has_wget" == 1 ]; then
-      download_with_wget "$url" "$output"
+    local linux="$1"
+    local has_wget="$2"
+    local url="$3"
+    local output="$4"
+  
+    # Darwin specific
+    if [[ "$linux" == 0 ]]; then
+        download_with_curl "$url" "$output"
+    elif [ "$linux" == 0 ]; then
+        download_with_curl "$url" "$output"
     else
-      download_with_curl "$url" "$output" 
+        if [ "$has_wget" == 1 ]; then
+            download_with_wget "$url" "$output"
+        else
+            download_with_curl "$url" "$output" 
+        fi
     fi
-  fi
 }
 
 echo "runtimes-cache" > .gitignore
