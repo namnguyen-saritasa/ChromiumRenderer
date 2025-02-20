@@ -7,17 +7,17 @@ if /I "%PROCESSOR_ARCHITECTURE%"=="x86" (
     )
 )
 
-echo "runtimes-cache" > ChromiumRenderer\.gitignore
-echo "runtimes-cache/" > ChromiumRenderer\.dockerignore
+echo "runtimes-cache" > .gitignore
+echo "runtimes-cache/" > .dockerignore
 
 REM Set up temporary download folder and target extraction folder
 set "tempDir=%TEMP%\chrome-headless-shell-win64-download"
 if not exist "%tempDir%" mkdir "%tempDir%"
 set "zipFile=%tempDir%\chrome-headless-shell-win64.zip"
-set "parentTargetDir=ChromiumRenderer\runtimes-cache\win-x64"
-set "targetDir=ChromiumRenderer\runtimes-cache\win-x64\native"
-set "checkFile=ChromiumRenderer\runtimes-cache\win-x64\native\chrome-headless-shell.exe"
-set "zippedFolderDir=ChromiumRenderer\runtimes-cache\win-x64\chrome-headless-shell-win64"
+set "parentTargetDir=runtimes-cache\win-x64"
+set "targetDir=runtimes-cache\win-x64\native"
+set "checkFile=runtimes-cache\win-x64\native\chrome-headless-shell.exe"
+set "zippedFolderDir=runtimes-cache\win-x64\chrome-headless-shell-win64"
 if exist "%checkFile%" exit /b 0
 if not exist "%parentTargetDir%" mkdir "%parentTargetDir%"
 if exist "%targetDir%" rmdir /s /q "%targetDir%"

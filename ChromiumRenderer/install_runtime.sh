@@ -8,23 +8,23 @@ arch=$(uname -m)
 if [[ "$os" == "Darwin" &&  "$arch" == "arm64" ]]; then
     url="https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/mac-arm64/chrome-headless-shell-mac-arm64.zip"
     download_path="/tmp/chrome-headless-shell-mac-arm64.zip"
-    extract_dir="ChromiumRenderer/runtimes-cache/osx-arm64"
-    rename_dir="ChromiumRenderer/runtimes-cache/osx-arm64/native"
-    target_rename_dir="ChromiumRenderer/runtimes-cache/osx-arm64/chrome-headless-shell-mac-arm64"
+    extract_dir="runtimes-cache/osx-arm64"
+    rename_dir="runtimes-cache/osx-arm64/native"
+    target_rename_dir="runtimes-cache/osx-arm64/chrome-headless-shell-mac-arm64"
 elif [ "$os" = "Linux" ] && [ "$arch" = "x86_64" ]; then
     url="https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/linux64/chrome-headless-shell-linux64.zip"
     download_path="/tmp/chrome-headless-shell-linux64.zip"
-    extract_dir="ChromiumRenderer/runtimes-cache/linux-x64"
-    rename_dir="ChromiumRenderer/runtimes-cache/linux-x64/native"
-    target_rename_dir="ChromiumRenderer/runtimes-cache/linux-x64/chrome-headless-shell-linux64"
+    extract_dir="runtimes-cache/linux-x64"
+    rename_dir="runtimes-cache/linux-x64/native"
+    target_rename_dir="runtimes-cache/linux-x64/chrome-headless-shell-linux64"
     is_linux=true
 else
     echo "System not supported: $os $arch"
     exit 1
 fi
 
-echo "runtimes-cache" > ChromiumRenderer/.gitignore
-echo "runtimes-cache/" > ChromiumRenderer/.dockerignore
+echo "runtimes-cache" > .gitignore
+echo "runtimes-cache/" > .dockerignore
 
 # If the extraction directory exists and is non-empty, exit.
 if [ -d "$rename_dir" ] && [ "$(ls -A "$rename_dir")" ]; then
