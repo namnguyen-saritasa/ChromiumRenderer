@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RuntimeIdentifiers>win-x64;linux-x64;osx-arm64</RuntimeIdentifiers>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,9 +25,6 @@
                 <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             </Content>
         </ItemGroup>
-        <PropertyGroup>
-            <DefineConstants>$(DefineConstants);INCLUDED_HEADLESS_CHROME_WINAMD64</DefineConstants>
-        </PropertyGroup>
     </Target>
 
     <Target Name="WindowsRemoveRuntime" BeforeTargets="Clean" Condition="'$(OS)' == 'Windows_NT'">
@@ -48,9 +46,6 @@
                 <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             </Content>
         </ItemGroup>
-        <PropertyGroup>
-            <DefineConstants>$(DefineConstants);INCLUDED_HEADLESS_CHROME_LINUXAMD64;INCLUDED_HEADLESS_CHROME_OSXARM64</DefineConstants>
-        </PropertyGroup>
     </Target>
 
     <Target Name="UnixRemoveRuntimes" BeforeTargets="Clean" Condition="'$(OS)' != 'Windows_NT'">

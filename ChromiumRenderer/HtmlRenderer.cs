@@ -1,17 +1,21 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.Options;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
 
 namespace ChromiumRenderer;
 
-public class HtmlRenderer : IDisposable, IAsyncDisposable
+/// <summary>
+/// HTML to PDF renderer.
+/// </summary>
+public class HtmlRenderer : CriticalFinalizerObject, IDisposable, IAsyncDisposable
 {
     private readonly LaunchOptions launchOptions;
     private IBrowser? browser;
+    private bool disposed;
     
     private static string AssemblyDirectory
     {
@@ -32,35 +36,39 @@ public class HtmlRenderer : IDisposable, IAsyncDisposable
 
     private static string GetRelativePrepackedExecutablePath()
     {
-#if INCLUDED_HEADLESS_CHROME_WINAMD64
         if (OperatingSystem.IsWindowsVersionAtLeast(7) && RuntimeInformation.ProcessArchitecture == Architecture.X64)
         {
             return "runtimes-cache/win-x64/native/chrome-headless-shell.exe";
         }
-#endif
-        
-#if INCLUDED_HEADLESS_CHROME_LINUXAMD64
+
         if (OperatingSystem.IsLinux() && RuntimeInformation.ProcessArchitecture == Architecture.X64)
         {
             return "runtimes-cache/linux-x64/native/chrome-headless-shell";
         }
-#endif
-#if INCLUDED_HEADLESS_CHROME_OSXARM64
+
         if (OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
             return "runtimes-cache/osx-arm64/native/chrome-headless-shell";
         }
-#endif
+
         throw new NotSupportedException($"OS not supported: {Environment.OSVersion}, Pointer width: {Unsafe.SizeOf<nuint>()}");
     }
 
-    public HtmlRenderer(HtmlRendererConfigurations? configurations = null)
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="launchOptions">Launch options.</param>
+    /// <remarks>
+    /// If the launch options or its executable path is not provided,
+    /// HtmlRenderer will use the bundled ChromiumRenderer.
+    /// </remarks>
+    public HtmlRenderer(LaunchOptions? launchOptions = null)
     {
-        if (configurations == null || string.IsNullOrEmpty(configurations.ExecutablePath))
+        if (launchOptions == null || string.IsNullOrEmpty(launchOptions.ExecutablePath))
         {
             var executablePath = Path.Join(AssemblyDirectory, GetRelativePrepackedExecutablePath());
             CheckExecutableExists(executablePath);
-            launchOptions = new()
+            this.launchOptions = new()
             {
                 Headless = true,
                 ExecutablePath = executablePath,
@@ -70,16 +78,7 @@ public class HtmlRenderer : IDisposable, IAsyncDisposable
             return;
         }
 
-        launchOptions = new()
-        {
-            Headless = configurations.Headless,
-            ExecutablePath = configurations.ExecutablePath,
-        };
-    }
-
-    public HtmlRenderer(IOptions<HtmlRendererConfigurations> options)
-        : this(options.Value)
-    {
+        this.launchOptions = launchOptions;
     }
 
     private async Task<IBrowser> EnsureInitialized()
@@ -90,7 +89,8 @@ public class HtmlRenderer : IDisposable, IAsyncDisposable
         {
             return b;
         }
-        
+
+        ObjectDisposedException.ThrowIf(disposed, this);
         b = await Puppeteer.LaunchAsync(launchOptions);
         var oldValue = Interlocked.CompareExchange(ref browser, b, null);
         if (oldValue == null)
@@ -99,9 +99,22 @@ public class HtmlRenderer : IDisposable, IAsyncDisposable
         }
         await b.DisposeAsync();
         return oldValue;
-
     }
 
+    /// <summary>
+    /// Initialize the browser.
+    /// </summary>
+    public Task Initialize()
+    {
+        return EnsureInitialized();
+    }
+
+    /// <summary>
+    /// Render HTML to PDF.
+    /// </summary>
+    /// <param name="content">HTML content.</param>
+    /// <param name="stream">Output stream/</param>
+    /// <param name="pdfOptions">Render options.</param>
     public async Task RenderPdf(string content, Stream stream, PdfOptions? pdfOptions = null)
     {
         var b = await EnsureInitialized();
@@ -110,7 +123,13 @@ public class HtmlRenderer : IDisposable, IAsyncDisposable
         var s = await page.PdfStreamAsync(pdfOptions ?? new() { Format = PaperFormat.A4 });
         await s.CopyToAsync(stream);
     }
-    
+
+    /// <summary>
+    /// Render HTML to PDF.
+    /// </summary>
+    /// <param name="content">HTML content.</param>
+    /// <param name="pdfOptions">Render options.</param>
+    /// <returns>PDF content as a byte array.</returns>
     public async Task<byte[]> RenderPdf(string content, PdfOptions? pdfOptions = null)
     {
         var b = await EnsureInitialized();
@@ -119,22 +138,34 @@ public class HtmlRenderer : IDisposable, IAsyncDisposable
         return await page.PdfDataAsync(pdfOptions ?? new() { Format = PaperFormat.A4 });
     }
 
+    /// <inheritdoc />
+    ~HtmlRenderer()
+    {
+        Dispose();
+    }
+
+    /// <inheritdoc />
     public void Dispose()
     {
+        disposed = true; // Atomic
         IBrowser? b = null;
         b = Interlocked.Exchange(ref browser, b);
         b?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
+    /// <inheritdoc />
     public ValueTask DisposeAsync()
     {
+        disposed = true; // Atomic
         IBrowser? b = null;
         b = Interlocked.Exchange(ref browser, b);
         if (b != null)
         {
             return b.DisposeAsync();
         }
-        
+
+        GC.SuppressFinalize(this);
         return ValueTask.CompletedTask;
     }
 }
